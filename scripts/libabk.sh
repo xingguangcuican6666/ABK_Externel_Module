@@ -130,7 +130,7 @@ abk_apply_patch() {
   abk_require_dir "$target_dir"
 
   (
-    cd "$target_dir"
+    cd "$target_dir" || exit
     if git apply --reverse --check "$patch_file" >/dev/null 2>&1; then
       abk_log "patch already applied: $patch_file"
       exit 0
