@@ -16,6 +16,13 @@ module string in this format:
 https://github.com/your-name/your-module.git;after_patch
 ```
 
+For ABK APP
+
+```
+https://github.com/your-name/your-module.git
+```
+Then choose the after_patch.
+
 Multiple modules are separated with `|`:
 
 ```text
