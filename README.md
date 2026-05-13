@@ -9,19 +9,20 @@ not modify the kernel tree until you add your own logic.
 
 ## Usage
 
-Enable "custom external modules" in the ABK app or GitHub Actions, then pass a
-module string in this format:
+Enable "custom external modules" in the ABK app or GitHub Actions.
+
+In the ABK app, add the repository URL. The app reads `module.conf`, verifies
+the supported stages, then asks the user which stage or stages to add:
+
+```text
+https://github.com/your-name/your-module.git
+```
+
+For raw GitHub Actions input, pass `repo_url;stage` entries:
 
 ```text
 https://github.com/your-name/your-module.git;after_patch
 ```
-
-For ABK APP
-
-```
-https://github.com/your-name/your-module.git
-```
-Then choose the after_patch.
 
 Multiple modules are separated with `|`:
 
@@ -38,6 +39,40 @@ Supported stages:
 
 `befor_build` is accepted by ABK as a compatibility alias, but new modules
 should use `before_build`.
+
+## module.conf Metadata
+
+`module.conf` is now part of the ABK module contract. The app uses it for
+validation, stage selection, and module repository display. Keep it
+shell-compatible because `setup.sh` also sources it.
+
+| Field | Required | Meaning |
+| --- | --- | --- |
+| `ABK_MODULE_NAME` | Yes | Display name |
+| `ABK_MODULE_ID` | Recommended | Stable id used by metadata/control integrations |
+| `ABK_MODULE_VERSION` | Recommended | Display version |
+| `ABK_MODULE_DESCRIPTION` | Recommended | Short display description |
+| `ABK_MODULE_REPO_URL` | Recommended | Canonical repository URL |
+| `ABK_MODULE_SUPPORTED_STAGES` | Recommended | Comma-separated list, usually `after_patch,before_build` |
+| `ABK_MODULE_DEFAULT_STAGE` | Recommended | Stage preselected when no recommendation is available |
+| `ABK_MODULE_RECOMMENDED_STAGES` | Recommended | Comma-separated stages marked as recommended in the app |
+
+Example:
+
+```bash
+ABK_MODULE_ID="example_feature"
+ABK_MODULE_NAME="Example Feature"
+ABK_MODULE_VERSION="1.0.0"
+ABK_MODULE_DESCRIPTION="Patch and configure an example kernel feature."
+ABK_MODULE_REPO_URL="https://github.com/your-name/example-feature"
+ABK_MODULE_SUPPORTED_STAGES="after_patch,before_build"
+ABK_MODULE_DEFAULT_STAGE="after_patch"
+ABK_MODULE_RECOMMENDED_STAGES="after_patch,before_build"
+```
+
+When publishing through a central module repository, point the catalog item
+`repoUrl` to this module repository and mirror the same `supportedStages`,
+`defaultStage`, and `recommendedStages` values in the catalog JSON.
 
 ## Repository Layout
 
@@ -77,6 +112,9 @@ Recommended workflow:
 set -euo pipefail
 
 MODULE_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$MODULE_DIR/module.conf" ]; then
+  source "$MODULE_DIR/module.conf"
+fi
 source "$MODULE_DIR/scripts/libabk.sh"
 
 abk_require_env KERNEL_ROOT DEFCONFIG CUSTOM_EXTERNAL_MODULE_STAGE
@@ -109,6 +147,28 @@ esac
 | `ACTION_BUILD` | Action-Build repository path |
 | `KBUILD_BUILD_TIMESTAMP` | Available in `before_build` |
 | `KBUILD_BUILD_VERSION` | Available in `before_build` |
+
+Build-parameter variables exported to modules:
+
+| Variable | Meaning |
+| --- | --- |
+| `ABK_BUILD_ANDROID_VERSION` | Selected Android branch, for example `android14` |
+| `ABK_BUILD_KERNEL_VERSION` | Selected kernel line, for example `6.1` |
+| `ABK_BUILD_SUB_LEVEL` | Selected sublevel |
+| `ABK_BUILD_OS_PATCH_LEVEL` | Selected Android security patch level |
+| `ABK_BUILD_REVISION` | Selected kernel revision |
+| `ABK_BUILD_KSU_VARIANT` | KernelSU variant |
+| `ABK_BUILD_KSU_BRANCH` | KernelSU branch label |
+| `ABK_BUILD_VERSION` | Custom kernel local version input |
+| `ABK_BUILD_TIME` | Build timestamp input |
+| `ABK_BUILD_VIRTUALIZATION_SUPPORT` | Virtualization support setting |
+| `ABK_BUILD_ZRAM_EXTRA_ALGOS` | Extra ZRAM algorithm list |
+
+Feature flags are exported as `true` or `false`: `ABK_FEATURE_USE_ZRAM`,
+`ABK_FEATURE_USE_BBG`, `ABK_FEATURE_USE_DDK`, `ABK_FEATURE_USE_NTSYNC`,
+`ABK_FEATURE_USE_NETWORKING`, `ABK_FEATURE_USE_KPM`,
+`ABK_FEATURE_USE_REKERNEL`, `ABK_FEATURE_ENABLE_SUSFS`,
+`ABK_FEATURE_SUPP_OP`, and `ABK_FEATURE_ZRAM_FULL_ALGO`.
 
 See [docs/development.md](docs/development.md) for the full development guide.
 

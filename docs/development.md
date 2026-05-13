@@ -3,6 +3,28 @@
 An ABK external module is a normal Git repository. During a build, ABK clones
 the repository and runs `setup.sh` at the configured stage.
 
+## Metadata Contract
+
+Every reusable module should provide `module.conf` at the repository root. ABK
+uses it before adding a custom module, and `setup.sh` may source it at runtime.
+Keep the file shell-compatible and use plain `KEY="VALUE"` assignments.
+
+| Field | Required | Meaning |
+| --- | --- | --- |
+| `ABK_MODULE_NAME` | Yes | Display name shown in ABK |
+| `ABK_MODULE_ID` | Recommended | Stable id for metadata and future control APIs |
+| `ABK_MODULE_VERSION` | Recommended | Display version |
+| `ABK_MODULE_DESCRIPTION` | Recommended | Short description |
+| `ABK_MODULE_REPO_URL` | Recommended | Canonical repository URL |
+| `ABK_MODULE_SUPPORTED_STAGES` | Recommended | Comma-separated stages accepted by this module |
+| `ABK_MODULE_DEFAULT_STAGE` | Recommended | Fallback stage |
+| `ABK_MODULE_RECOMMENDED_STAGES` | Recommended | Comma-separated stages marked as recommended |
+
+ABK currently supports `after_patch` and `before_build`. The app rejects
+single-module additions when `module.conf` is missing or invalid, then asks the
+user to choose one or more supported stages. Central module repositories should
+mirror the same stage data in their catalog JSON.
+
 ## Input Format
 
 ```text
@@ -73,6 +95,18 @@ Conditional variables:
 - `KSU_VERSION`: set for KernelSU Official builds.
 - `KBUILD_BUILD_TIMESTAMP` and `KBUILD_BUILD_VERSION`: guaranteed only in
   `before_build`.
+- Build parameters exported to every stage:
+  `ABK_BUILD_ANDROID_VERSION`, `ABK_BUILD_KERNEL_VERSION`,
+  `ABK_BUILD_SUB_LEVEL`, `ABK_BUILD_OS_PATCH_LEVEL`, `ABK_BUILD_REVISION`,
+  `ABK_BUILD_KSU_VARIANT`, `ABK_BUILD_KSU_BRANCH`, `ABK_BUILD_VERSION`,
+  `ABK_BUILD_TIME`, `ABK_BUILD_VIRTUALIZATION_SUPPORT`, and
+  `ABK_BUILD_ZRAM_EXTRA_ALGOS`.
+- Feature flags exported as `true` or `false`:
+  `ABK_FEATURE_USE_ZRAM`, `ABK_FEATURE_USE_BBG`, `ABK_FEATURE_USE_DDK`,
+  `ABK_FEATURE_USE_NTSYNC`, `ABK_FEATURE_USE_NETWORKING`,
+  `ABK_FEATURE_USE_KPM`, `ABK_FEATURE_USE_REKERNEL`,
+  `ABK_FEATURE_ENABLE_SUSFS`, `ABK_FEATURE_SUPP_OP`, and
+  `ABK_FEATURE_ZRAM_FULL_ALGO`.
 - Standard GitHub Actions variables such as `GITHUB_REPOSITORY`, `GITHUB_REF`,
   `GITHUB_SHA`, `GITHUB_RUN_ID`, `RUNNER_OS`, `RUNNER_TEMP`, `HOME`, and `PATH`
   are also available.
