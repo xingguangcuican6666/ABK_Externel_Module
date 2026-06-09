@@ -71,6 +71,8 @@ shell-compatible because `setup.sh` also sources it.
 | `ABK_MODULE_SUPPORTED_STAGES` | Recommended | Comma-separated list, usually `after_patch,before_build` |
 | `ABK_MODULE_DEFAULT_STAGE` | Recommended | Stage preselected when no recommendation is available |
 | `ABK_MODULE_RECOMMENDED_STAGES` | Recommended | Comma-separated stages marked as recommended in the app |
+| `ABK_MAGISK_MODULE_NAME` | Optional | Bundled Magisk dependency display name for boot/AK3 flash |
+| `ABK_MAGISK_MODULE_DOWNLOAD_URL` | Optional | Bundled Magisk dependency ZIP URL |
 | `ABK_MODULE_KIND` | Optional | `module_set` enables grouped child selection in the app |
 | `ABK_MODULE_SET_ID` | Module-set only | Stable module-set id |
 | `ABK_MODULE_SET_NAME` | Module-set only | Module-set display name |
@@ -97,6 +99,9 @@ When publishing through a central module repository, point the catalog item
 
 For module-set repositories, the central catalog should only declare the entry
 as `"kind": "module_set"`. Child feat/fix definitions stay in `module.conf`.
+Child lines may also append `magisk_module_name|magisk_module_url` so the app
+can bundle those regular Magisk modules into the outer `.bundle.zip` layer and
+install them before flashing boot/AnyKernel3 payloads.
 
 ## Repository Layout
 

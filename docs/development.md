@@ -19,6 +19,8 @@ Keep the file shell-compatible and use plain `KEY="VALUE"` assignments.
 | `ABK_MODULE_SUPPORTED_STAGES` | Recommended | Comma-separated stages accepted by this module |
 | `ABK_MODULE_DEFAULT_STAGE` | Recommended | Fallback stage |
 | `ABK_MODULE_RECOMMENDED_STAGES` | Recommended | Comma-separated stages marked as recommended |
+| `ABK_MAGISK_MODULE_NAME` | Optional | Display name of a bundled ordinary Magisk dependency |
+| `ABK_MAGISK_MODULE_DOWNLOAD_URL` | Optional | ZIP URL of that Magisk dependency |
 
 ABK currently supports `after_patch` and `before_build`. The app rejects
 single-module additions when `module.conf` is missing or invalid, then asks the
@@ -55,6 +57,14 @@ For `set:` items, ABK exports:
 - `ABK_MODULE_ENTRY_KIND=module_set_child`
 - `ABK_MODULE_GROUP_REPO_URL=<group repo url>`
 - `ABK_MODULE_CHILD_ID=<child id>`
+
+Module-set child lines may append:
+
+- `magisk_module_name`
+- `magisk_module_url`
+
+When present, ABK bundles those ZIPs into the final outer notice layer and the
+app installs them before flashing boot/AnyKernel3 payloads.
 
 ## Stage Selection
 
