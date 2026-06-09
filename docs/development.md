@@ -37,12 +37,24 @@ Example:
 https://github.com/your-name/net-patch.git;after_patch|https://github.com/your-name/final-config.git;before_build
 ```
 
+SC5 tagged format:
+
+```text
+module:https://github.com/your-name/net-patch.git;after_patch|set:https://github.com/your-name/module-set.git#feat_guard;before_build
+```
+
 Rules:
 
 - `repo_url` supports `https://`, `http://`, `git://`, `ssh://`, and `git@`.
 - `stage` supports `after_patch` and `before_build`.
 - Every module repository must provide `setup.sh` at the repository root.
 - ABK runs the entry point with `bash setup.sh`.
+
+For `set:` items, ABK exports:
+
+- `ABK_MODULE_ENTRY_KIND=module_set_child`
+- `ABK_MODULE_GROUP_REPO_URL=<group repo url>`
+- `ABK_MODULE_CHILD_ID=<child id>`
 
 ## Stage Selection
 

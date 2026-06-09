@@ -18,16 +18,31 @@ the supported stages, then asks the user which stage or stages to add:
 https://github.com/your-name/your-module.git
 ```
 
-For raw GitHub Actions input, pass `repo_url;stage` entries:
+For raw GitHub Actions input, ABK accepts both the legacy format and the SC5
+tagged format.
+
+Legacy:
 
 ```text
 https://github.com/your-name/your-module.git;after_patch
 ```
 
+Tagged single module:
+
+```text
+module:https://github.com/your-name/your-module.git;after_patch
+```
+
+Tagged module-set child:
+
+```text
+set:https://github.com/your-name/your-module.git#feat_selinux_guard;before_build
+```
+
 Multiple modules are separated with `|`:
 
 ```text
-https://github.com/your-name/module-a.git;after_patch|https://github.com/your-name/module-b.git;before_build
+module:https://github.com/your-name/module-a.git;after_patch|set:https://github.com/your-name/module-set.git#fix_policy_cleanup;before_build
 ```
 
 Supported stages:
@@ -56,6 +71,12 @@ shell-compatible because `setup.sh` also sources it.
 | `ABK_MODULE_SUPPORTED_STAGES` | Recommended | Comma-separated list, usually `after_patch,before_build` |
 | `ABK_MODULE_DEFAULT_STAGE` | Recommended | Stage preselected when no recommendation is available |
 | `ABK_MODULE_RECOMMENDED_STAGES` | Recommended | Comma-separated stages marked as recommended in the app |
+| `ABK_MODULE_KIND` | Optional | `module_set` enables grouped child selection in the app |
+| `ABK_MODULE_SET_ID` | Module-set only | Stable module-set id |
+| `ABK_MODULE_SET_NAME` | Module-set only | Module-set display name |
+| `ABK_MODULE_SET_VERSION` | Module-set only | Module-set display version |
+| `ABK_MODULE_SET_DESCRIPTION` | Module-set only | Module-set description |
+| `ABK_MODULE_SET_ITEMS` | Module-set only | Multi-line child declarations parsed by the app |
 
 Example:
 
@@ -73,6 +94,9 @@ ABK_MODULE_RECOMMENDED_STAGES="after_patch,before_build"
 When publishing through a central module repository, point the catalog item
 `repoUrl` to this module repository and mirror the same `supportedStages`,
 `defaultStage`, and `recommendedStages` values in the catalog JSON.
+
+For module-set repositories, the central catalog should only declare the entry
+as `"kind": "module_set"`. Child feat/fix definitions stay in `module.conf`.
 
 ## Repository Layout
 
